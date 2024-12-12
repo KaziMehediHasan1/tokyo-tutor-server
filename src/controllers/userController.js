@@ -75,4 +75,18 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-module.exports = { userController, getUser, getAllUsers };
+// USER PROMOTE
+const userPromote = async (req, res) => {
+  try {
+    const { id, role } = req.body;
+    console.log(id, role);
+    const findUser = await userModel.findByIdAndUpdate(id, {
+      $set: { userRole: role },
+    });
+    res.status(200).json(findUser);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: error.message });
+  }
+};
+module.exports = { userController, getUser, getAllUsers,userPromote };
