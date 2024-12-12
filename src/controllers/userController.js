@@ -18,30 +18,61 @@ const userController = async (req, res) => {
   }
 };
 
-//GET USER AND IMPLEMENT JWT AUTHENTICATION SYSTEM
+//GET SPECIFIC USER AND IMPLEMENT JWT AUTHENTICATION SYSTEM
 const getUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log(email, password, "25 no line");
-    const user = await userModel.findOne({ email });
-    // CHECK USER
-    if (!email) {
-      return res.status(400).json({ message: "user not found" });
+    console.log(email, password);
+    // Validate inputs
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
     }
+
+    // Find the user by email
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
-    const token = await jwt.sign(
+
+    // Generate JWT token
+    const token = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
-    res.status(200).json({ user: user, token: token });
+
+    res.status(200).json({
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        photo: user.photo,
+      },
+      token,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// GET ALL USER AND SHOW DASHBOARD COMPONENT
+const getAllUsers = async (req, res) => {
+  try {
+    const getUsers = await userModel.find();
+    res.status(200).json({ users: getUsers });
   } catch (error) {
     console.log(error);
     res.status(400).json({ message: error.message });
   }
 };
 
-module.exports = { userController, getUser };
+module.exports = { userController, getUser, getAllUsers };

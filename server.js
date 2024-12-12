@@ -2,7 +2,8 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const dbConnect = require("./config/dbConnect");
-const userRoute = require("./src/routes/userRoute"); 
+const userRoute = require("./src/routes/userRoute");
+const lessonRoute = require("./src/routes/lessonRoute");
 
 // Initialize express app
 const app = express();
@@ -16,6 +17,7 @@ dbConnect();
 
 // Use userRoute for routes
 app.use("/", userRoute);
+app.use("/", lessonRoute);
 
 // Root Route
 app.get("/", (req, res) => {
